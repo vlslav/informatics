@@ -1,242 +1,272 @@
-#define _CRT_SECURE_NO_WARNINGS 
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <locale.h>
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <string>
+#include <cstring>
+#include <windows.h>
+#include <vector>
+#include <cmath>
+using namespace std;
 
-int k;//отвечает за тип данных
-int q;//отвечает за тип операции
+template <typename T>
+class Tree{
+public:
+    Tree(): high(0), root(NULL){};
+    ~Tree();
+    struct Leaf{
+        T element;
+        Leaf *Right;
+        Leaf *Left;
+        Leaf *parent;
+    };
+    Leaf *root;
+    int high;
+    void Del(Leaf *kot);
+    void insert(T& d);
+    void print_inorder();
+    void beginascendinground();
+	void inorder(Leaf*);
+	T* findtheleast();
+	int Search(Leaf* root);
+    bool isEmpty() const { return root==NULL; }
 
-struct matrix{
-	int n, m, size;
-	void* z;
-}first, second, result;
-struct complex{
-	int x, y;
+protected:
+    void ascendinground(Leaf* L);
 };
-void* init(int* n, int* m){
-	int i, j;
-	void* matrix = malloc(*n**m*first.size);
-	for (i = 0; i < *n; i++)
-		for (j = 0; j < *m; j++){
-			if (k == 1){
-				if (n == &first.n) printf("a[%d][%d] = ", i, j);
-				else printf("b[%d][%d] = ", i, j);
-				scanf("%d", ((int*)matrix + i**m + j));
-			}
-			else if (k == 2){
-				if (n == &first.n) printf("a[%d][%d] = ", i, j);
-				else printf("b[%d][%d] = ", i, j);
-				scanf("%f", ((float*)matrix + i**m + j));
-			}
-			else if (k == 3){
-				if (n == &first.n){
-					printf("a[%d][%d].re = ", i, j);
-					scanf("%d", &(((struct complex*)matrix + i**m + j)->x));
-					printf("a[%d][%d].im = ", i, j);
-					scanf("%d", &(((struct complex*)matrix + i**m + j)->y));
-				}
-				else {
-					printf("b[%d][%d].re = ", i, j);
-					scanf("%d", &(((struct complex*)matrix + i**m + j)->x));
-					printf("b[%d][%d].im = ", i, j);
-					scanf("%d", &(((struct complex*)matrix + i**m + j)->y));
-				}
-			}
-		}
-	return matrix;
-}
-void sumInt(void* a, void* b, int i, int j){
-	*((int*)result.z + i*first.m + j) = *((int*)a) + *((int*)b);
-}
-void sumFloat(void* a, void* b, int i, int j){
-	*((float*)result.z + i*first.m + j) = *((float*)a) + *((float*)b);
-}
-void sumComplex(void* a, void* b, int i, int j){
-	((struct complex*)result.z + i*first.m + j)->x = ((struct complex*)a)->x + ((struct complex*)b)->x;
-	((struct complex*)result.z + i*first.m + j)->y = ((struct complex*)a)->y + ((struct complex*)b)->y;
-}
-void universalSum(void* a, void* b, void(*func)(void* a, void* b, int i, int j)){
-	int i, j;
-	result.z = malloc(first.n*first.m*first.size);
-	for (i = 0; i < first.n; i++)
-		for (j = 0; j < first.m; j++){
-			func((char*)a + (i*first.m + j)*first.size, (char*)b + (i*first.m + j)*first.size, i, j);
-		}
-}
-void multiplyInt(void* a, void* b, int i, int j){
-	*((int*)result.z + i*second.m + j) += *((int*)a) * *((int*)b);
-}
-void multiplyFloat(void* a, void* b, int i, int j){
-	*((float*)result.z + i*second.m + j) += *((float*)a) * *((float*)b);
-}
-void multiplyComplex(void* a, void* b, int i, int j){
-	((struct complex*)result.z + i*second.m + j)->x += ((struct complex*)a)->x*((struct complex*)b)->x - ((struct complex*)a)->y*((struct complex*)b)->y;
-	((struct complex*)result.z + i*second.m + j)->y += ((struct complex*)a)->x*((struct complex*)b)->y + ((struct complex*)a)->y*((struct complex*)b)->x;
-}
-void universalMultiply(void* a, void* b, void(*func)(void *a, void *b, int i, int j)){
-	int i, j, h;
-	result.z = calloc(first.n*second.m, first.size);
-	for (i = 0; i < first.n; i++)
-		for (j = 0; j < second.m; j++)
-			for (h = 0; h < first.m; h++){
-				func((char*)a + (i*second.n + h)*first.size, (char*)b + (i*second.n + h)*first.size, i, j);
-			}
-}
-void output(void* a){
-	int i, j;
-	if (q == 1){
-		for (i = 0; i < first.n; i++){
-			for (j = 0; j < first.m; j++){
-				if (k == 1) printf("%d  ", *((int*)result.z + i*first.m + j));
-				else if (k == 2) printf("%f  ", *((float*)result.z + i*first.m + j));
-				else if (k == 3) printf("(%d + %d*i)  ", ((struct complex*)result.z + i*first.m + j)->x, ((struct complex*)result.z + i*first.m + j)->y);
-			}
-			printf("\n");
-		}
+template <class T>
+void Tree<T>::insert(T& d)
+{
+	Leaf* t = new Leaf;
+	t->element = d;
+	t->Left = NULL;
+	t->Right = NULL;
+	t->parent = NULL;
+	//
+	if (isEmpty())
+	{
+		root = t;
 	}
-	if (q == 2){
-		for (i = 0; i < first.n; i++){
-			for (j = 0; j < second.m; j++){
-				if (k == 1) printf("%d  ", *((int*)result.z + i*second.m + j));
-				else if (k == 2) printf("%f  ", *((float*)result.z + i*second.m + j));
-				else if (k == 3) printf("(%d + %d*i)  ", ((struct complex*)result.z + i*second.m + j)->x, ((struct complex*)result.z + i*second.m + j)->y);
-			}
-			printf("\n");
+	else
+	{
+		Leaf* curr;
+		curr = root;
+		while(curr)
+		{
+			t->parent = curr;
+			if(t->element > curr->element) curr = curr->Right;
+			else curr = curr->Left;
 		}
+
+		if(t->element < t->parent->element)
+			t->parent->Left = t;
+		else
+			t->parent->Right = t;
 	}
 }
-void test(){
-	int i, j;
-	first.z = malloc(2 * 3 * first.size);
-	second.z = malloc(2 * 3 * first.size);
-	first.n = 2;
-	first.m = 3;
-	if (q == 1){
-		if (k == 1){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++){
-					*((int*)first.z + i*first.m + j) = i + j;
-					*((int*)second.z + i*first.m + j) = 2 * (i + j);
-				}
-			universalSum(first.z, second.z, sumInt);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++)
-					if (*((int*)result.z + i*first.m + j) != 3 * (i + j)) printf("Error \n");
-		}
-		else if (k == 2){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++){
-					*((float*)first.z + i*first.m + j) = i + j;
-					*((float*)second.z + i*first.m + j) = 2 * (i + j);
-				}
-			universalSum(first.z, second.z, sumFloat);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++)
-					if (*((float*)result.z + i*first.m + j) != 3 * (i + j)) printf("Error \n");
-		}
-		else if (k == 3){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++){
-					((struct complex*)first.z + i*first.m + j)->x = ((struct complex*)first.z + i*first.m + j)->y = i + j;
-					((struct complex*)second.z + i*first.m + j)->x = ((struct complex*)second.z + i*first.m + j)->y = 2 * (i + j);
-				}
-			universalSum(first.z, second.z, sumComplex);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++){
-					if (((struct complex*)result.z + i*first.m + j)->x != 3 * (i + j)) printf("Error\n");
-					if (((struct complex*)result.z + i*first.m + j)->y != 3 * (i + j)) printf("Error\n");
-				}
-		}
+
+template <class T>
+T* Tree<T> :: findtheleast()
+{
+	if(root == NULL)
+		return NULL;
+
+	Leaf* ptr = root;
+	while(ptr->Left!=NULL)
+	{
+		ptr=ptr->Left;
 	}
-	if (q == 2){
-		second.n = 3;
-		second.m = 2;
-		if (k == 1){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++)
-					*((int*)first.z + i*first.m + j) = 8;
-			for (i = 0; i < second.n; i++)
-				for (j = 0; j < second.m; j++)
-					*((int*)second.z + i*second.m + j) = 2;
-			universalMultiply(first.z, second.z, multiplyInt);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < second.m; j++)
-					if (*((int*)result.z + i*second.m + j) != 48) printf("Error \n");
-		}
-		else if (k == 2){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++)
-					*((float*)first.z + i*first.m + j) = 8;
-			for (i = 0; i < second.n; i++)
-				for (j = 0; j < second.m; j++)
-					*((float*)second.z + i*second.m + j) = 2;
-			universalMultiply(first.z, second.z, multiplyFloat);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < second.m; j++)
-					if (*((float*)result.z + i*second.m + j) != 48) printf("Error\n");
-		}
-		else if (k == 3){
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < first.m; j++)
-					((struct complex*)first.z + i*first.m + j)->x = ((struct complex*)first.z + i*first.m + j)->y = 2;
-			for (i = 0; i < second.n; i++)
-				for (j = 0; j < second.m; j++)
-					((struct complex*)second.z + i*second.m + j)->x = ((struct complex*)second.z + i*second.m + j)->y = 2;
-			universalMultiply(first.z, second.z, multiplyComplex);
-			for (i = 0; i < first.n; i++)
-				for (j = 0; j < second.m; j++){
-					if (((struct complex*)result.z + i*second.m + j)->x != 0) printf("Error\n");
-					if (((struct complex*)result.z + i*second.m + j)->y != 24) printf("Error\n");
-				}
-		}
+	return &ptr->element;
+}
+template <typename T>
+void Tree <T> :: Del(Leaf *kot){
+    if (kot!=NULL)
+    {
+        Del(kot->Left);
+        Del(kot->Right);
+        delete kot;
+    }
+}
+template<class T>
+void Tree<T>::print_inorder()
+{
+	inorder(root);
+}
+template<class T>
+void Tree<T>::inorder(Leaf* p)
+{
+	if(p != NULL)
+	{
+		if(p->Left) inorder(p->Left);
+		cout<<" "<<p->element<<" ";
+		if(p->Right) inorder(p->Right);
+	}
+	else return;
+}
+
+template <class T>
+void Tree <T>::beginascendinground()
+{
+    if (root)
+    {
+        ascendinground(root);
+    }
+    else
+        cout<<"  Tree is empty"<<endl;
+}
+
+template <class T>
+void Tree <T>::ascendinground(Leaf* L)
+{
+    if (L->Left)
+        ascendinground(L->Left);
+    if (L->Right)
+        ascendinground(L->Right);
+    cout<<" "<<L->element;
+}
+template <class T>
+int Tree<T>::Search(Leaf* root){
+	Leaf *pv = root, *prev;
+	bool found = false;
+	T element1;
+	cout << "Enter the student/professor to search for:" << endl;
+	cin >> element1;
+	while (pv && !found)
+	{
+		prev = pv;
+		if (element1 == pv->element) found = true;
+		else if (element1 < pv->element) pv = pv->Left;
+		else pv = pv->Right;
+	}
+	if (found) return 1;
+	else return 0;
+}
+
+class Student{
+    public:
+    string surname;
+    string name;
+    string patronymic;
+    string group;
+    bool operator<(Student& p1)
+    {
+        if(strcmp(surname.c_str(),p1.surname.c_str())<0) return 1;
+        else return 0;
+    }
+    bool operator>(Student& p1)
+    {
+        if(strcmp(surname.c_str(),p1.surname.c_str())<0)return 0;
+        else return 1;
+    }
+	bool operator==(Student& p1)
+	{
+		if (strcmp(surname.c_str(), p1.surname.c_str()) == 0) return 1;
+		else return 0;
 	}
 
+    friend ostream& operator<<(ostream& os, Student& petr){
+        os << petr.surname << " " << petr.name << " " << petr.patronymic << " " << petr.group << endl;
+        return os;
+    }
+    friend istream& operator>>(istream& is, Student& petr){
+        is >> petr.surname;
+        is >> petr.name;
+        is >> petr.patronymic;
+        is >> petr.group;
+        return is;
+    }
+};
+class Professors{
+    public:
+    string surname;
+    string name;
+    string patronymic;
+    string subject;
+    bool operator<(Professors& p1){
+        if(strcmp(surname.c_str(),p1.surname.c_str())<0)return 1;
+        else return 0;
+        }
+     bool operator>(Professors& p1){
+        if(strcmp(surname.c_str(),p1.surname.c_str())<0)return 0;
+        else return 1;
+    }
+    friend ostream& operator<<(ostream& os, Professors& petr){
+        os << petr.surname << " " << petr.name << " " << petr.patronymic << " " << petr.subject << endl;
+        return os;
+    }
+    friend istream& operator>>(istream& is, Professors& petr){
+        is >> petr.surname;
+        is >> petr.name;
+        is >> petr.patronymic;
+        is >> petr.subject;
+        return is;
+    }
+
+};
+
+template <typename T>
+Tree <T> :: ~Tree(){
+    this->Del(root);
 }
+
+
 int main(){
-	setlocale(LC_ALL, "Rus");
-	int p;
-	printf("Введите 1 для целых, 2 для вещественных, 3 для комплексных\n");
-	scanf("%d", &k);
-	if (k == 1) first.size = sizeof(int);
-	else if (k == 2) first.size = sizeof(float);
-	else if (k == 3) first.size = sizeof(struct complex);
-	printf("Введите 1 для сложения, 2 для умножения\n");
-	scanf("%d", &q);
-	printf("Хотите выполнить тест? (Yes-1 or No-2)\n");
-	scanf("%d", &p);
-	if (p == 1){
-		test();
-	}
-	else if (p == 2){
-		printf("Введите кол-во строк и столбцов первой матрицы\n");
-		scanf("%d %d", &first.n, &first.m);
-		printf("Введите кол-во строк и столбцов второй матрицы\n");
-		scanf("%d %d", &second.n, &second.m);
-		if (q == 1){
-			if (first.n == second.n && first.m == second.m){
-				first.z = init(&first.n, &first.m);
-				second.z = init(&second.n, &second.m);
-				if (k == 1) universalSum(first.z, second.z, sumInt);
-				else if (k == 2) universalSum(first.z, second.z, sumFloat);
-				else if (k == 3) universalSum(first.z, second.z, sumComplex);
-				output(result.z);
+    Tree <Student> Stud1;
+	int ch;
+
+	Student petr;
+	while(1)
+	{
+		cout<<endl<<endl;
+		cout<<" Binary Search Tree Operations "<<endl;
+		cout<<" ----------------------------- "<<endl;
+		cout<<" 1. Insertion/Creation "<<endl;
+		cout<<" 2. Show In-Order "<<endl;
+		cout<<" 3. Find the least element"<<endl;
+		cout<<" 4. Ascending bypass"<<endl;
+		cout<<" 5. The search element to the entry" << endl;
+		cout<<" 6. Exit "<<endl;
+		cout<<" Enter your choice : ";
+		cin>>ch;
+		switch(ch)
+		{
+		case 1 : cout<<" Enter data to be inserted : ";
+			cin.ignore(1);
+			cin >> petr;
+			Stud1.insert(petr);
+			break;
+		case 2 : cout<<endl;
+			cout<<" In-Order Traversal "<<endl;
+			cout<<" -------------------"<<endl;
+			Stud1.print_inorder();
+			break;
+		case 3 : cout<<endl;
+		{
+		 	 Student* minStud = Stud1.findtheleast();
+		 	 if ( minStud == NULL)
+		 	 	cout<<"Tree is empty"<<endl;
+		 	 else
+		 	 {
+		 	 	cout<<"The least element is";
+		 	 	cout<<"	"<<*minStud<<endl;
+		 	 }
+		 	break;
+		 }
+		case 4 : cout<<endl;
+            cout<<" ascending bypass "<<endl;
+            cout<<" *****************"<<endl;
+            Stud1.beginascendinground();
+            break;
+		case 5:
+			cout << endl;
+			if (Stud1.Search(Stud1.root) == 1){
+				cout << "The student was found";
 			}
-			else printf("Матрицы невозможно сложить\n");
-		}
-		else if (q == 2){
-			if (first.m == second.n){
-				first.z = init(&first.n, &first.m);
-				second.z = init(&second.n, &second.m);
-				if (k == 1) universalMultiply(first.z, second.z, multiplyInt);
-				else if (k == 2) universalMultiply(first.z, second.z, multiplyFloat);
-				else if (k == 3) universalMultiply(first.z, second.z, multiplyComplex);
-				output(result.z);
-			}
-			else printf("Матрицы невозможно умножить\n");
+			else cout << "The student is not found";
+			break;
+		case 6 : system("pause");
+				return 0;
+				break;
+
 		}
 	}
-	free(first.z);
-	free(second.z);
-	free(result.z);
-	system("PAUSE");
 }
